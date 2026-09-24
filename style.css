@@ -90,6 +90,8 @@ button:disabled { cursor: default; opacity: 0.45; }
   height: calc(var(--s) * var(--rows));
   flex: none;
 }
+/* 1 列はマスが小さいので、上下 1 マス分も押せるようにする */
+.board.line::before { content: ''; position: absolute; left: 0; right: 0; top: calc(var(--s) * -1); bottom: calc(var(--s) * -1); }
 /* マスは碁盤の線ではなく丸いくぼみ（交点に置く囲碁とは違う） */
 .hole {
   position: absolute;

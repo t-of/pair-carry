@@ -179,6 +179,7 @@ function play(n) {
   $('stage-name').textContent = `ステージ ${n}（${s.label}）`;
   $('min').textContent = `最少 ${s.min}`;
   rotateBtn.hidden = !s.grid;
+  boardEl.classList.toggle('line', !s.grid);
   restart();
   fit();
 }
@@ -221,13 +222,13 @@ function render() {
   $('undo-btn').disabled = !game.history.length || game.done;
 }
 
-// タップした点 → マスの番号と、盤の上の位置（マス単位）、マスの中心からのずれ（-0.5〜0.5）
+// タップした点 → マスの番号と、盤の上の位置（マス単位）、マスの中心からのずれ
 function cellAt(e) {
   const r = boardEl.getBoundingClientRect();
   const size = r.width / game.s.cols;
   const x = (e.clientX - r.left) / size, y = (e.clientY - r.top) / size;
-  const c = Math.floor(x), row = Math.floor(y);
-  if (c < 0 || c >= game.s.cols || row < 0 || row >= game.s.rows) return null;
+  // 1 列は盤の上下 1 マス分も押せる（.board.line::before）。はみ出した分はいちばん近いマスにする
+  const c = Math.min(game.s.cols - 1, Math.max(0, Math.floor(x))), row = Math.min(game.s.rows - 1, Math.max(0, Math.floor(y)));
   return { i: row * game.s.cols + c, x, y, dx: x - c - 0.5, dy: y - row - 0.5 };
 }
 
@@ -242,7 +243,6 @@ boardEl.addEventListener('animationend', (e) => e.target.closest('.stone')?.clas
 boardEl.addEventListener('click', (e) => {
   if (!game || game.done) return;
   const t = cellAt(e);
-  if (!t) return;
   const { s, cells, held } = game;
   if (cells[t.i]) {
     if (held && (t.i === held.a || t.i === held.b)) { game.held = null; sfx.tap(); render(); return; }
