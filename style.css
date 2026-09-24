@@ -1,0 +1,296 @@
+:root {
+  --bg: #a3b8ad;            /* 黒い石も白い石も沈まない、くすんだ緑 */
+  --fg: #1f2a26;
+  --muted: #45564f;
+  --accent: #c8532c;        /* 置ける所・主なボタン */
+  --accent-deep: #9c3d1e;
+  --face: #eef3ef;
+  --edge: #7f968a;          /* ボタンの下の影（平らに 1 段ずらすだけ） */
+  --hole: rgba(31, 42, 38, 0.13);
+  --line: rgba(31, 42, 38, 0.18);
+  --black: #1c211f;
+  --white: #fbfaf5;
+
+  /* webapp-kit のシートも明るい色に */
+  --wak-bg: #eef3ef;
+  --wak-fg: #1f2a26;
+  --wak-muted: #45564f;
+  --wak-line: rgba(31, 42, 38, 0.18);
+  --wak-accent: #c8532c;
+  --wak-accent-fg: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+/* Safari 26 の上下バーの色は html の背景から取られる。body と同じ色にしておく */
+html { background-color: var(--bg); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: 0.45; }
+[hidden] { display: none !important; }
+
+/* 画面の端に置くものはセーフエリアの分だけ内側に。高さは 100vh ではなく 100dvh */
+.screen {
+  min-height: 100dvh;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding:
+    max(12px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  touch-action: manipulation;   /* ダブルタップ拡大を止める */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pill {
+  min-height: 36px;
+  border: 1px solid var(--line);
+  background: var(--face);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+.btn {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  background: var(--face);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 16px;
+  font-weight: 600;
+  box-shadow: 0 2px 0 var(--edge);
+}
+.btn--main {
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  box-shadow: 0 3px 0 var(--accent-deep);
+}
+
+/* ---- 盤（マスと石） ---- */
+
+.board {
+  --s: 40px;                /* 1 マス。main.js の fit() で決める */
+  position: relative;
+  width: calc(var(--s) * var(--cols));
+  height: calc(var(--s) * var(--rows));
+  flex: none;
+}
+/* マスは碁盤の線ではなく丸いくぼみ（交点に置く囲碁とは違う） */
+.hole {
+  position: absolute;
+  left: calc(var(--s) * var(--c));
+  top: calc(var(--s) * var(--r));
+  width: var(--s);
+  height: var(--s);
+}
+.hole::before {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: var(--hole);
+  box-shadow: inset 0 calc(var(--s) * 0.04) 0 rgba(31, 42, 38, 0.12);
+}
+/* 置ける所（もと石を置けるマス） */
+.hole.can::before {
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.stone {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--s);
+  height: var(--s);
+  transform: translate(calc(var(--s) * var(--c)), calc(var(--s) * var(--r)));
+  transition: transform 0.15s ease-out;
+  pointer-events: none;
+}
+.stone b {
+  position: absolute;
+  inset: 7%;
+  border-radius: 50%;
+  transition: transform 0.12s ease-out;
+}
+.stone.black b { background: var(--black); box-shadow: 0 calc(var(--s) * 0.05) 0 #0b0e0d; }
+.stone.white b { background: var(--white); box-shadow: 0 calc(var(--s) * 0.05) 0 #b9c2b8; }
+/* 持ち上げた 2 個: 少し浮かせて縁どる */
+.stone.held { z-index: 2; }
+.stone.held b {
+  transform: translateY(-14%);
+  outline: max(2px, calc(var(--s) * 0.07)) solid var(--accent);
+  outline-offset: 1px;
+}
+/* もと石の印: 相方の向きを指す三角（タップした所に来るのはこの石） */
+.stone i {
+  display: none;
+  position: absolute;
+  inset: 0;
+  transform: translateY(-14%) rotate(calc(var(--d) * 90deg));
+  transition: transform 0.12s ease-out;
+}
+.stone.base i { display: block; }
+.stone i::before {
+  content: '';
+  position: absolute;
+  left: 58%;
+  top: 50%;
+  margin-top: calc(var(--s) * -0.13);
+  border-style: solid;
+  border-color: transparent transparent transparent var(--accent);
+  border-width: calc(var(--s) * 0.13) 0 calc(var(--s) * 0.13) calc(var(--s) * 0.2);
+}
+.stone.shake b { animation: shake 0.22s ease-out; }
+@keyframes shake { 25% { translate: -8% 0; } 75% { translate: 8% 0; } }
+.board.instant .stone, .board.instant .stone b, .board.instant .stone i { transition: none; }
+
+/* ---- タイトル ---- */
+
+.title { gap: 14px; }
+.title__head { text-align: center; padding-top: 10px; }
+.board--sample { --s: 40px; margin: 0 auto; }
+.title__name { margin: 12px 0 0; font-size: 32px; letter-spacing: 0.12em; }
+.title__catch { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+.howto {
+  margin: 0;
+  padding: 10px 14px 10px 30px;
+  background: var(--face);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.howto b { color: var(--accent-deep); font-weight: 700; }
+
+.pick__label { margin: 0 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+.stages + .pick__label { margin-top: 12px; }
+.stages { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.stg {
+  min-height: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 4px 2px;
+  border: 1px solid var(--line);
+  background: var(--face);
+  border-radius: 12px;
+  box-shadow: 0 2px 0 var(--edge);
+  line-height: 1.15;
+}
+.stg__n { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stg__size { font-size: 11px; color: var(--muted); }
+.stg__state { font-size: 10px; color: var(--muted); }
+.stg[data-state="clear"] { border-color: var(--accent); }
+.stg[data-state="clear"] .stg__state { color: var(--accent-deep); font-weight: 700; }
+.stg[data-state="best"] { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 2px 0 var(--accent-deep); }
+.stg[data-state="best"] .stg__size, .stg[data-state="best"] .stg__state { color: #fff; }
+
+.foot { margin-top: auto; padding-top: 8px; text-align: center; }
+.foot__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
+.credit { margin: 10px 0 0; font-size: 12px; color: var(--muted); }
+.credit a { color: inherit; }
+
+/* ---- 遊ぶ ---- */
+
+.play {
+  height: 100dvh;
+  min-height: 0;
+  position: relative;
+  gap: 8px;
+  padding-left: max(10px, env(safe-area-inset-left));
+  padding-right: max(10px, env(safe-area-inset-right));
+}
+.hud { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; }
+.hud__back { justify-self: start; min-height: 44px; }
+.hud__moves { display: flex; flex-direction: column; align-items: center; line-height: 1.15; }
+.hud__label { font-size: 12px; color: var(--muted); }
+.hud__num { font-size: 30px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hud__unit { font-size: 13px; font-weight: 600; color: var(--muted); }
+.hud__min { justify-self: end; font-size: 13px; color: var(--muted); }
+
+.stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.btn--rotate { min-width: 140px; }
+/* クリアのカードが出たら、盤を上に寄せて見えるようにする */
+.play.cleared .stage { justify-content: flex-start; padding-top: 12px; }
+.play.cleared .tools, .play.cleared .btn--rotate { visibility: hidden; }
+.tools { display: flex; gap: 8px; justify-content: center; padding-top: 4px; }
+.tools .btn { flex: 1; max-width: 200px; }
+
+/* ---- クリア（盤の上に下寄せで重ねる） ---- */
+
+.clear {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding:
+    0
+    max(12px, env(safe-area-inset-right))
+    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-left));
+  background: linear-gradient(180deg, transparent 40%, rgba(31, 42, 38, 0.25));
+}
+.clear.locked { pointer-events: none; }
+.clear__card {
+  width: 100%;
+  padding: 16px 16px 14px;
+  background: var(--face);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(31, 42, 38, 0.22);
+  text-align: center;
+  animation: rise 0.3s ease-out;
+}
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+.clear__title { margin: 0; font-size: 20px; color: var(--accent-deep); letter-spacing: 0.08em; }
+.clear__moves { margin: 4px 0 0; font-size: 18px; }
+.clear__moves span { font-size: 42px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.clear__min { margin: 0; color: var(--muted); font-size: 14px; }
+.clear__badges { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin: 10px 0 0; }
+.clear__badges:empty { display: none; }
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(200, 83, 44, 0.14);
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 600;
+}
+.clear__card .btn--main { margin-top: 12px; }
+.clear__row { display: flex; gap: 8px; margin-top: 8px; }
+.clear__row .btn { flex: 1; padding: 10px 6px; }
+
+/* 動きを弱める設定では滑らせず、すぐ置く */
+@media (prefers-reduced-motion: reduce) {
+  .stone, .stone b, .stone i { transition: none; }
+  .stone.shake b, .clear__card { animation: none; }
+}
+
+/* 全画面のオーバーレイは opacity ではなく display: none で隠す */

@@ -1,0 +1,19 @@
+{
+  "id": "./",
+  "name": "PAIR CARRY — 二つずつ運んで白黒に分ける",
+  "short_name": "PAIR CARRY",
+  "description": "黒と白が交互に並んだ碁石を、となり合う 2 個ずつ空いた所へ動かして、黒と白に分けるパズル。組が増えるほど、どこから崩すかが難しくなる。1 列と市松の盤。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#a3b8ad",
+  "theme_color": "#a3b8ad",
+  "lang": "ja",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

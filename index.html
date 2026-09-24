@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#a3b8ad">
+  <meta name="description" content="黒と白が交互に並んだ碁石を、となり合う 2 個ずつ空いた所へ動かして、黒と白に分けるパズル。組が増えるほど、どこから崩すかが難しくなる。1 列と市松の盤。">
+  <title>PAIR CARRY — 二つずつ運んで白黒に分ける</title>
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PAIR CARRY">
+  <meta property="og:title" content="PAIR CARRY — 二つずつ運んで白黒に分ける">
+  <meta property="og:description" content="黒と白が交互に並んだ碁石を、となり合う 2 個ずつ空いた所へ動かして、黒と白に分けるパズル。組が増えるほど、どこから崩すかが難しくなる。1 列と市松の盤。">
+  <meta property="og:url" content="https://t-of.github.io/pair-carry/">
+  <meta property="og:image" content="https://t-of.github.io/pair-carry/icons/og.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- apple-mobile-web-app-status-bar-style は付けない（black-translucent だと iOS 26 で上部が隠れる） -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PAIR CARRY">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="./webapp-kit/webapp-kit.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- タイトル（ステージ一覧） -->
+  <main class="screen title" id="title">
+    <header class="title__head">
+      <div class="board board--sample" id="sample" aria-hidden="true"></div>
+      <h1 class="title__name">PAIR CARRY</h1>
+      <p class="title__catch">二つずつ運んで白黒に分ける</p>
+    </header>
+
+    <ol class="howto">
+      <li>黒と白が交互に並んでいる。<b>黒と白に分けて、すき間なく並べたら</b>クリア（黒が左でも右でもよい）</li>
+      <li>石をタップすると、<b>となりの石と 2 個組</b>で持ち上がる。空いている所をタップすると、その 2 個が<b>並びはそのまま</b>で動く</li>
+      <li>手数が少ないほどよい。いちばん少ない手数も出る</li>
+    </ol>
+
+    <section class="pick">
+      <h2 class="pick__label">1 列</h2>
+      <div class="stages" id="stages-line"></div>
+      <h2 class="pick__label">市松（組を回して置ける）</h2>
+      <div class="stages" id="stages-grid"></div>
+    </section>
+
+    <button class="btn btn--main" id="continue-btn">つづきから</button>
+
+    <footer class="foot">
+      <div class="foot__actions">
+        <button class="pill" id="sound-btn" aria-pressed="true">音 オン</button>
+        <button class="pill" data-wak="install" hidden>アプリにする</button>
+        <button class="pill" data-wak="share">共有</button>
+      </div>
+      <p class="credit"><a href="/">T.OF...</a> のアプリ</p>
+    </footer>
+  </main>
+
+  <!-- 遊ぶ -->
+  <main class="screen play" id="play" hidden>
+    <header class="hud">
+      <button class="pill hud__back" id="back-btn">もどる</button>
+      <div class="hud__moves">
+        <span class="hud__label" id="stage-name">ステージ 1（3組）</span>
+        <span class="hud__num"><span class="hud__unit">手数</span> <span id="moves">0</span></span>
+      </div>
+      <div class="hud__min" id="min">最少 0</div>
+    </header>
+
+    <section class="stage" id="stage">
+      <div class="board" id="board" role="application" aria-label="盤"></div>
+      <button class="btn btn--rotate" id="rotate-btn" hidden disabled>回す</button>
+    </section>
+
+    <footer class="tools">
+      <button class="btn" id="undo-btn">1 手もどす</button>
+      <button class="btn" id="reset-btn">はじめから</button>
+    </footer>
+
+    <!-- クリア（盤の上に下寄せで重ねる） -->
+    <section class="clear" id="clear" hidden>
+      <div class="clear__card" role="dialog" aria-labelledby="clear-title">
+        <h2 class="clear__title" id="clear-title">分かれた</h2>
+        <p class="clear__moves"><span id="clear-moves">0</span> 手</p>
+        <p class="clear__min">最少 <span id="clear-min">0</span> 手</p>
+        <p class="clear__badges" id="badges"></p>
+        <button class="btn btn--main" id="next-btn">つぎへ</button>
+        <div class="clear__row">
+          <button class="btn" id="again-btn">もう一度</button>
+          <button class="btn" id="share-btn">共有</button>
+          <button class="btn" id="home-btn">一覧へ</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./webapp-kit/webapp-kit.js"></script>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
