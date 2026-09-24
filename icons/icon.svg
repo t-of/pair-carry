@@ -1,1 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#a3b8ad"/><text x="256" y="256" dy=".35em" text-anchor="middle" font-family="system-ui,sans-serif" font-weight="700" font-size="280" fill="#eceef3">P</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#a3b8ad"/>
+  <g transform="translate(-8,-40) scale(0.98)">
+    <!-- track: 石2個(左)、空きマス2個(右、光る) -->
+    <ellipse cx="104" cy="398" rx="44" ry="44" fill="#0b0e0d"/>
+    <circle cx="104" cy="390" r="44" fill="#1c211f"/>
+    <ellipse cx="204" cy="398" rx="44" ry="44" fill="#b9c2b8"/>
+    <circle cx="204" cy="390" r="44" fill="#fbfaf5" stroke="#8fa398" stroke-width="3"/>
+    <circle cx="308" cy="390" r="44" fill="rgba(255,255,255,0.5)" stroke="#c8532c" stroke-width="9"/>
+    <circle cx="408" cy="390" r="44" fill="rgba(255,255,255,0.5)" stroke="#c8532c" stroke-width="9"/>
+
+    <!-- floating pair: 持ち上がった2個組(黒+白) -->
+    <ellipse cx="296" cy="312" rx="55" ry="15" fill="#1f2a26" opacity="0.2"/>
+    <ellipse cx="416" cy="312" rx="55" ry="15" fill="#1f2a26" opacity="0.2"/>
+    <ellipse cx="296" cy="234" rx="62" ry="62" fill="#0b0e0d"/>
+    <circle cx="296" cy="224" r="62" fill="#1c211f"/>
+    <ellipse cx="416" cy="234" rx="62" ry="62" fill="#b9c2b8"/>
+    <circle cx="416" cy="224" r="62" fill="#fbfaf5" stroke="#8fa398" stroke-width="3"/>
+  </g>
+</svg>
