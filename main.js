@@ -180,8 +180,8 @@ function play(n) {
   $('min').textContent = `最少 ${s.min}`;
   rotateBtn.hidden = !s.grid;
   boardEl.classList.toggle('line', !s.grid);
+  fit();          // 石を作る前にマスの大きさを決める（あとで変えると石がすべって見える）
   restart();
-  fit();
 }
 
 // はじめから: はじめの並びに戻す（滑らせずにすぐ。石を作り直す）
